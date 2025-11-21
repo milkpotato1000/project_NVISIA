@@ -11,8 +11,13 @@ dependencies = [
 
     "openai",
     "psycopg2",
-    "ipykernel",
-    
+    "ipykernel (>=7.1.0,<8.0.0)",
+    "requests (>=2.32.5,<3.0.0)",
+    "bs4 (>=0.0.2,<0.0.3)",
+    "pandas (>=2.3.3,<3.0.0)",
+    "dotenv (>=0.9.9,<0.10.0)",
+
+
 ]
 
 
