@@ -20,6 +20,9 @@ dependencies = [
     "streamlit",
     "pyvis",
     "networkx",
+    "folium (>=0.20.0,<0.21.0)",
+    "streamlit-folium (>=0.25.3,<0.26.0)",
+    "chardet (>=5.2.0,<6.0.0)",
 
 
 ]
