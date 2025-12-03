@@ -115,20 +115,35 @@ else:
     # Determine height
     table_height = 600 if st.session_state.expanded else 250
     
-    # Show full dataframe in a scrollable container with the calculated height
-    # Enable row selection
-    # Exclude embedding column from display and specify column order
-    display_columns = ['id', 'title', 'summary', 'publish_date', 'category']
-    # Only include columns that exist in the dataframe
-    display_columns = [col for col in display_columns if col in df.columns]
-    event = st.dataframe(
-        df[display_columns], 
-        height=table_height, 
-        use_container_width=True, 
-        on_select="rerun", 
-        selection_mode="single-row"
-    )
-    st.caption(f"Showing {len(df)} rows – scroll to view the rest.")
+    # Create layout: left for dataframe, right for map
+    df_col, map_col = st.columns([2, 1])
+    
+    with df_col:
+        # Show full dataframe in a scrollable container with the calculated height
+        # Enable row selection
+        # Exclude embedding column from display and specify column order
+        display_columns = ['id', 'title', 'summary', 'publish_date', 'category']
+        # Only include columns that exist in the dataframe
+        display_columns = [col for col in display_columns if col in df.columns]
+        event = st.dataframe(
+            df[display_columns], 
+            height=table_height, 
+            use_container_width=True, 
+            on_select="rerun", 
+            selection_mode="single-row"
+        )
+        st.caption(f"Showing {len(df)} rows – scroll to view the rest.")
+    
+    with map_col:
+        try:
+            from PIL import Image
+            map_image = Image.open("data/map.png") #지도파일 로딩 경로
+            st.image(map_image, caption="지리 정보 (향후 PostgreSQL 연동 예정)", width=int(map_image.width * 0.7))
+        except FileNotFoundError:
+            st.info("지도 이미지를 찾을 수 없습니다. (data/map.png)")
+        except Exception as e:
+            st.error(f"지도 이미지 로드 오류: {e}")
+
 
     # Determine which data to use for the chart and update col2
     if len(event.selection.rows) > 0 and embeddings is not None:
