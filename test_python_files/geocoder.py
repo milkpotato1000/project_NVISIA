@@ -19,6 +19,10 @@ class Geocoder:
         3) geojson table에서 geometry 호출
         4) folium 지도에 시각화
 
+        [수정 2025-12-04]
+        issue: 지도에 여러개의 기사가 아닌 클릭한 기사 하나만 표시.
+        solve: get_map 외에 get_map_single 함수 추가.
+
         """
 
         # Postgre db 연결
@@ -106,9 +110,8 @@ class Geocoder:
         # Folium 맵 객체 초기화
         m = folium.Map(location=location, zoom_start=zoom_start)
 
-        #
-        for loc, geojson_data in geo_dict.items():
-            
+        # 지도에 표시
+        for loc, geojson_data in geo_dict.items():            
             style_function = lambda x, color = self.get_random_color(): {
                     'fillColor': color,
                     'color': 'black',
@@ -117,6 +120,42 @@ class Geocoder:
             }
 
             # folium.GeoJson 객체 생성 및 지도에 추가
+            folium.GeoJson(
+                geojson_data,
+                name=loc,
+                tooltip=folium.Tooltip(loc),
+                style_function=style_function
+            ).add_to(m)
+
+        return m
+    
+    def get_map_single(self, click_id, location=(39.0, 127.0), zoom_start=7):
+        """
+        
+        [작성 2025-12-04]
+        사용자가 클릭한 단일 기사 하나의 event_loc만 지도에 표시.
+
+        """
+
+        ids = [click_id]
+        event_locs = self.get_event_loc(ids)
+
+        # event_loc 없는 경우 빈 지도 반환
+        m = folium.Map(location=location, zoom_start=zoom_start)
+        if not event_locs:
+            return m
+        
+        geo_dict = self.get_geometry(event_locs)
+
+        # 지도에 표시
+        for loc, geojson_data in geo_dict.items():            
+            style_function = lambda x, color = self.get_random_color(): {
+                    'fillColor': color,
+                    'color': 'black',
+                    'weight': 1,
+                    'fillOpacity': 0.7
+            }
+
             folium.GeoJson(
                 geojson_data,
                 name=loc,

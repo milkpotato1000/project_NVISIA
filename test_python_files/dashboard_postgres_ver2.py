@@ -91,7 +91,6 @@ def load_all_articles():
     conn.close()
     return pd.DataFrame(rows)
 
-
 # 데이터 로드
 df = load_all_articles()
 
@@ -102,6 +101,17 @@ if not df.empty and 'publish_date' in df.columns:
 if df.empty:
     st.warning("No data to display.")
 else:
+
+    # 확장 상태 초기화
+    if "expanded" not in st.session_state:
+        st.session_state.expanded = False
+    if "selected_id" not in st.session_state:
+        st.session_state.selected_id = None
+    if "map_obj" not in st.session_state:
+        st.session_state.map_obj = None
+    if "rec_df" not in st.session_state:
+        st.session_state.rec_df = None
+
     # 상단 섹션을 위한 1:2 비율 컬럼 생성
     col1, col2 = st.columns([1, 2])
 
@@ -113,10 +123,6 @@ else:
         rec_container = st.empty()
 
     st.divider()
-
-    # 확장 상태 초기화
-    if "expanded" not in st.session_state:
-        st.session_state.expanded = False
 
     # 확장 토글 버튼
     def toggle_expanded():
@@ -150,40 +156,47 @@ else:
         )
         st.caption(f"Showing {len(df)} rows – scroll to view the rest.")
 
-    # Recommender, Geocoder 에서 모두 활용할 기사 id 를 받는 변수 생성.
-    selected_id = None
+    # rerun에서 사용자가 선택한 id (streamlit 무한 호출로 인해 코드 수정)
+    current_selected_id = None
 
     if len(event.selection.rows) > 0:
         selected_idx = event.selection.rows[0]
-        selected_id = df.iloc[selected_idx]["id"]
+        current_selected_id = df.iloc[selected_idx]["id"]
+
+    # 선택이 바뀐 경우에만 DB 호출
+    if current_selected_id is not None and current_selected_id != st.session_state.selected_id:
+        st.session_state.selected_id = current_selected_id
+
+        if current_selected_id is not None:
+            # 지도 새로 생성
+            st.session_state.map_obj = geo.get_map_single(current_selected_id)
+
+            # 추천 기사 새로 조회
+            rec_list = rec.get_similar_articles(current_selected_id, k=10)
+            rec_df = pd.DataFrame(rec_list)
+            if not rec_df.empty:
+                rec_df = rec_df.merge(
+                    df[['id', 'summary']],
+                    on='id',
+                    how='left'
+                )
+            st.session_state.rec_df = rec_df
 
     with map_col:
-        if selected_id is not None:
-            m = geo.get_map_single(selected_id)
-            st_folium(m, width=300, height=400)
+        if st.session_state.map_obj is not None:
+            st_folium(st.session_state.map_obj, width=300, height=400, key="map")
         else:
             st.info("위치를 조회하고자 하는 기사를 선택해주세요.")
 
-
     # 차트(col1)에 사용할 데이터 결정 및 col2 업데이트
-    if selected_id is not None:
-        # rec.py
-        rec_list = rec.get_similar_articles(selected_id, k=10)
-        rec_df = pd.DataFrame(rec_list)
-
-        if not rec_df.empty:
-            rec_df = rec_df.merge(
-                df[['id', 'summary']],
-                on='id',
-                how='left'
-            )
-
+    if st.session_state.selected_id is not None and st.session_state.rec_df is not None:
+        rec_df = st.session_state.rec_df
         chart_df = rec_df
         chart_title = "추천 뉴스 카테고리"
         
         # col2에 추천 데이터 테이블 표시
         with rec_container.container():
-            st.subheader(f"관련 추천 뉴스 (기준: {selected_id})")
+            st.subheader(f"관련 추천 뉴스 (기준: {st.session_state.selected_id})")
             if not rec_df.empty:
                 # 긴 텍스트 축약을 위한 복사본 생성
                 cols_for_display = ['id', 'title', 'summary', 'category', 'publish_date']
@@ -192,7 +205,7 @@ else:
 
                 if 'summary' in display_df.columns:
                     display_df['summary'] = display_df['summary'].apply(lambda x: x[:50] + '...' if isinstance(x, str) and len(x) > 50 else x)
-                
+                    
                 # 정렬 가능한 컬럼을 위해 st.dataframe 사용
                 st.dataframe(
                     display_df,
@@ -208,7 +221,8 @@ else:
         chart_title = "전체 뉴스 카테고리"
         
         # col2에 안내 메시지 표시
-        rec_container.info("아래 목록에서 기사를 선택하면 추천 뉴스가 표시됩니다.")
+        with rec_container.container():
+            st.info("아래 목록에서 기사를 선택하면 추천 뉴스가 표시됩니다.")
 
     # col1에 파이 차트 그리기
     with chart_container.container():
