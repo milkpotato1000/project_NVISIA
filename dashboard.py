@@ -1,5 +1,5 @@
 # Streamlit 대시보드 - summary_df_final.csv 시각화
-# 유사도 기반 동적 추천 시스템 포함
+# 유사도 기반 동적 추천 시스템 포함 (URL 링크 기능 추가)
 
 import streamlit as st
 import pandas as pd
@@ -166,16 +166,31 @@ else:
             st.subheader(f"관련 추천 뉴스 (기준: {df.iloc[selected_idx]['id']})")
             if not rec_df.empty:
                 # 긴 텍스트 축약을 위한 복사본 생성
-                display_df = rec_df[['id', 'title', 'summary', 'category', 'event_date']].copy()
+                # url 컬럼이 있는지 확인하고 포함 (순서 변경: url을 맨 앞으로)
+                cols_to_display = ['id', 'title', 'summary', 'category', 'event_date']
+                if 'url' in rec_df.columns:
+                    cols_to_display.insert(0, 'url')
+                
+                display_df = rec_df[cols_to_display].copy()
+                
                 if 'summary' in display_df.columns:
                     display_df['summary'] = display_df['summary'].apply(lambda x: x[:50] + '...' if isinstance(x, str) and len(x) > 50 else x)
                 
+                # 컬럼 설정: url 컬럼을 LinkColumn으로 설정
+                column_config = {}
+                if 'url' in display_df.columns:
+                    column_config["url"] = st.column_config.LinkColumn(
+                        "Link",
+                        display_text="Open Article"
+                    )
+
                 # 정렬 가능한 컬럼을 위해 st.dataframe 사용
                 st.dataframe(
                     display_df,
                     use_container_width=True,
                     hide_index=True,
-                    height=300
+                    height=300,
+                    column_config=column_config
                 )
             else:
                 st.info("No recommended data available.")
