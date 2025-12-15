@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 
 from rec import Recommender
 from geocoder_ver2 import Geocoder
-from knowledge_ver3 import KnowledgeGraph
+from knowledge_ver4 import KnowledgeGraph
 import folium
 import hashlib
 
@@ -75,6 +75,10 @@ solve: dataframe selection 로직에서 else(초기화) 구문 제거하여 선�
 [수정 2025-12-12] (ver15.3)
 issue: 파이차트 시각화 변경 요청
 solve: 파이차트 -> 가로 바 차트(Horizontal Bar Chart)로 변경
+
+[수정 2025-12-15] (ver15.4)
+issue: Knowledge Graph의 edge 색을 keyword 노드 색과 통일.
+solve: knowledge_ver4.py 생성 및 import 변경. Edge 색상을 연결된 Keyword 노드의 community color로 설정.
 
 [추가 2025-12-15] (ver16)
 issue: 북한 주요 위치 좌표 layer 추가하여 folium에 띄우기
