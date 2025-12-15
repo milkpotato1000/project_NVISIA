@@ -330,30 +330,30 @@ with top_left:
 
         if not category_counts.empty:
 
-            left_spacer, center_col, right_spacer = st.columns([1, 3, 1])
+            # left_spacer, center_col, right_spacer = st.columns([1, 3, 1])
 
-            # 파이차트 가운데 위치
-            with center_col:
+            # # 파이차트 가운데 위치
+            # with center_col:
 
-                def autopct_filter(pct):
-                    return ('%1.1f%%' % pct) if pct > 5 else ''
-                
-                fig, ax = plt.subplots(figsize=(1.7, 1.7))
-                # 레이블 바깥쪽, 회전 없음
-                wedges, texts, autotexts = ax.pie(
-                    category_counts,
-                    labels=category_counts.index,
-                    autopct=autopct_filter,
-                    startangle=90,
-                    textprops={"fontsize": 4},
-                )               
+            def autopct_filter(pct):
+                return ('%1.1f%%' % pct) if pct > 5 else ''
+            
+            fig, ax = plt.subplots(figsize=(1.7, 1.7))
+            # 레이블 바깥쪽, 회전 없음
+            wedges, texts, autotexts = ax.pie(
+                category_counts,
+                labels=category_counts.index,
+                autopct=autopct_filter,
+                startangle=90,
+                textprops={"fontsize": 4},
+            )               
 
-                # 파이 내부 퍼센트 글자 크기 작게
-                for autotext in autotexts:
-                    autotext.set_fontsize(4)
+            # 파이 내부 퍼센트 글자 크기 작게
+            for autotext in autotexts:
+                autotext.set_fontsize(4)
 
-                ax.axis("equal")
-                st.pyplot(fig, width="content")
+            ax.axis("equal")
+            st.pyplot(fig, width="content")
         else:
             st.info("입력된 데이터가 없습니다. 데이터를 추가해주세요.")
     else:
