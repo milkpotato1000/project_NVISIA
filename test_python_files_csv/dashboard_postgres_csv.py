@@ -182,17 +182,15 @@ if "ingest_status" not in st.session_state:
 
 def go_dashboard():
     st.session_state["page"] = "dashboard"
-    st.rerun()
 
 def go_home():
     st.session_state["page"] = "home"
-    st.rerun()
 
 def render_home():
     st.title("NVISIA: North-Korea Vision & Insights by SIA")
 
     uploaded = st.file_uploader(
-        "csv 파일 추가하기",
+        "csv 파일을 올려주세요. 'title, content, publish_date, url'을 header로 꼭 사용해주세요. 네 가지 중 하나라도 누락된 경우, 업로드가 진행되지 않습니다.", 
         type=["csv"],
         accept_multiple_files=False
     )
@@ -202,7 +200,7 @@ def render_home():
             "name": uploaded.name,
             "bytes": uploaded.getvalue(),
         }
-        st.success(f"업로드가 완료되었습니다.: {uploaded.name}")
+        st.success(f"하단의 '기사 업로드 시작'을 눌러 작업을 시작해주세요. 기사의 양에 따라 오랜 시간이 소요될 수도 있습니다.")
 
     st.markdown("")
 
@@ -210,7 +208,7 @@ def render_home():
 
     with col1:
         if st.button(
-            "CSV 업로드 >> LLM >> DB >> dashboard",
+            "기사 업로드 시작",
             disabled=(st.session_state["uploaded_csv"] is None),
             use_container_width=True
         ):
@@ -248,7 +246,7 @@ def render_home():
 
     with col2:
         st.button(
-            "dashboard로 이동 (이미 DB에 데이터가 있는 경우)",
+            "Dashboard로 이동",
             on_click=go_dashboard,
             use_container_width=True
         )

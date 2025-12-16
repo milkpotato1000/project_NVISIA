@@ -18,6 +18,10 @@ class Recommender:
         issue: knowledge graph 표현 위해서는 Recommender의 출력값에 keywords도 필요
         solve: 출력 result에 keywords 추가
 
+        [수정 2025-12-16]
+        issue: streamlit 기사 클릭 시, get_similar_articles 에서 numpy.int64 에러 발생
+        solve: click_id 를 numpy int로부터 python int로 변환
+
         """
 
         # Postgre db 연결
@@ -58,7 +62,7 @@ class Recommender:
             ORDER BY s.embedding <=> b.embedding
             LIMIT %s;
         """
-
+        click_id = int(click_id)
         self.cur.execute(query, (click_id, click_id, k))
         rows = self.cur.fetchall()
 

@@ -73,7 +73,7 @@ class LLMtoDatabase:
         
         # Load nk_cities and build maps for normalization
         try:
-            self.nk_cities = pd.read_csv('data/nk_cities.csv', encoding='euc-kr')
+            self.nk_cities = pd.read_csv('../data/nk_cities.csv', encoding='euc-kr')
             self.provinces_map, self.cities_map = self._build_maps()
             self.BROAD_TERMS_MAP = {
                 "평안도": ["평안남도", "평안북도"],

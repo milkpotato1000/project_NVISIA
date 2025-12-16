@@ -29,6 +29,10 @@ class KnowledgeGraph:
         issue: Graph Edge Color를 Keyword Node Color와 일치시키기.
         solve: get_figure 메서드에서 edge 그릴 때, 연결된 keyword 노드의 community color를 참조하여 edge_color 리스트 생성.
 
+        [수정 2025-12-16]
+        issue: kg 생성 시 list index out of range 에러 발생.
+        solve: 기존 id가 'spnews_100' 형태여서 split("_")[1] 구조로 코드를 작성했었음 > [-1]로 수정  
+
         """
 
         self.dataframe = pd.DataFrame(rec_list)
@@ -322,7 +326,7 @@ class KnowledgeGraph:
 
             if attributes['type'] == 'article':
                 article_nodes.append(node_id)
-                article_labels[node_id] = str(node_id).split("_")[1]
+                article_labels[node_id] = str(node_id).split("_")[-1]
                 article_colors.append("#000000") 
 
             elif attributes['type'] == 'keyword':
